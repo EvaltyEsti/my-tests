@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Симулятор интервью</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+/* ═══ VARIABLES ═══ */
+:root {
+  --bg: #f4f5f9;
+  --bg2: #ffffff;
+  --bg3: #eef1f6;
+  --bg-card: #ffffff;
+  --border: #dde2eb;
+  --text: #1a2332;
+  --text2: #4a5568;
+  --text3: #8b95a5;
+  --accent: #c07800;
+  --accent-bg: #fef3e2;
+  --accent-glow: rgba(192,120,0,.12);
+  --green: #0fa67a;
+  --green-bg: #e6f7f1;
+  --red: #d7394c;
+  --red-bg: #fce8eb;
+  --blue: #1a7fb5;
+  --blue-bg: #e5f1f8;
+  --purple: #7c5cbf;
+  --purple-bg: #f0ebfa;
+  --shadow: 0 2px 12px rgba(0,0,0,.06);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,.09);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --font-h: 'Cormorant Garamond', Georgia, serif;
+  --font-b: 'Rubik', system-ui, sans-serif;
+}
+html.dark {
+  --bg: #0b1222; --bg2: #111c30; --bg3: #0e1729; --bg-card: #152035;
+  --border: #1e3050; --text: #e2e8f0; --text2: #94a3b8; --text3: #5a6b80;
+  --accent: #f0a500; --accent-bg: rgba(240,165,0,.1); --accent-glow: rgba(240,165,0,.15);
+  --green: #34d399; --green-bg: rgba(52,211,153,.1);
+  --red: #f87171; --red-bg: rgba(248,113,113,.1);
+  --blue: #60a5fa; --blue-bg: rgba(96,165,250,.1);
+  --purple: #a78bfa; --purple-bg: rgba(167,139,250,.1);
+  --shadow: 0 2px 12px rgba(0,0,0,.25); --shadow-lg: 0 8px 30px rgba(0,0,0,.35);
+}
+
+/* ═══ RESET ═══ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--font-b);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  min-height:100vh;
+  min-height:100dvh;
+}
+img{max-width:100%;display:block}
+button{cursor:pointer;font-family:inherit;border:none;background:none;font-size:inherit}
+
+/* ═══ APP SHELL ═══ */
+#simApp{
+  max-width:680px;
+  margin:0 auto;
+  padding:20px 18px 30px;
+}
+.sim-header{
+  text-align:center;
+  margin-bottom:20px;
+}
+.sim-header h1{
+  font-family:var(--font-h);
+  font-size:1.6rem;
+  font-weight:700;
+  color:var(--text);
+  margin-bottom:4px;
+}
+.sim-header .subtitle{
+  font-size:.85rem;
+  color:var(--text2);
+}
+
+/* ═══ COMMON UI ═══ */
+.t-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+.t-h1{font-family:var(--font-h);font-size:1.55rem;font-weight:700;line-height:1.25;color:var(--text);margin-bottom:10px}
+.t-body{font-size:.9rem;line-height:1.65;color:var(--text2)}
+.t-small{font-size:.82rem;line-height:1.55;color:var(--text2)}
+.mb-3{margin-bottom:16px}
+.mt-3{margin-top:16px}
+.text-center{text-align:center}
+.stagger > *{animation:fadeUp .45s ease both}
+.stagger > *:nth-child(1){animation-delay:.05s}
+.stagger > *:nth-child(2){animation-delay:.12s}
+.stagger > *:nth-child(3){animation-delay:.19s}
+.stagger > *:nth-child(4){animation-delay:.26s}
+.stagger > *:nth-child(5){animation-delay:.33s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+.ex-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.ex-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.3px;background:var(--purple-bg);color:var(--purple)}
+.ex-score{font-weight:600;font-size:.85rem;color:var(--accent);background:var(--accent-bg);padding:4px 12px;border-radius:12px}
+
+.metaphor-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin:12px 0;box-shadow:var(--shadow)}
+
+.option-card{
+  display:flex;align-items:flex-start;gap:12px;padding:14px 16px;
+  border:2px solid var(--border);border-radius:var(--radius);margin-bottom:8px;
+  cursor:pointer;transition:all .2s;background:var(--bg-card);
+}
+.option-card:hover{border-color:var(--accent);transform:translateX(4px);box-shadow:var(--shadow)}
+.option-card.selected{border-color:var(--accent);background:var(--accent-bg)}
+.option-card.correct-ans{border-color:var(--green);background:var(--green-bg)}
+.option-card.wrong-ans{border-color:var(--red);background:var(--red-bg)}
+.option-card.answered{pointer-events:none;opacity:.85}
+.option-letter{min-width:32px;height:32px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;color:var(--text2);flex-shrink:0}
+.option-text{font-size:.85rem;line-height:1.5;color:var(--text)}
+
+.situation-feedback{padding:14px 16px;border-radius:var(--radius);margin:10px 0;font-size:.85rem;line-height:1.55;animation:fadeUp .3s ease}
+.situation-feedback.ok{background:var(--green-bg);color:var(--green);border-left:3px solid var(--green)}
+.situation-feedback.partial{background:var(--blue-bg);color:var(--blue);border-left:3px solid var(--blue)}
+.situation-feedback.fail{background:var(--red-bg);color:var(--red);border-left:3px solid var(--red)}
+
+.score-ring{position:relative;width:160px;height:160px;margin:16px auto}
+.score-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.score-ring .track{fill:none;stroke:var(--border);stroke-width:8}
+.score-ring .fill-circle{fill:none;stroke:var(--accent);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)}
+.score-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.score-big{font-family:var(--font-h);font-size:2.2rem;font-weight:700;color:var(--accent);line-height:1}
+.score-label{font-size:.72rem;color:var(--text3);margin-top:4px}
+.result-msg{padding:16px 18px;border-radius:var(--radius);margin:16px 0;font-size:.88rem;line-height:1.6}
+
+/* ═══ SIMULATOR SPECIFIC ═══ */
+.sim-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:14px 0}
+.sim-arch-card{
+  background:var(--bg-card);border:2px solid var(--border);border-radius:var(--radius);
+  padding:16px 12px;cursor:pointer;transition:all .25s;text-align:center;
+}
+.sim-arch-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.sim-arch-card.selected{border-color:var(--accent);background:var(--accent-bg)}
+.sim-arch-card.locked{pointer-events:none;opacity:.5}
+.sim-avatar{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 8px;flex-shrink:0}
+.sim-arch-name{font-weight:700;font-size:.85rem;margin-bottom:2px}
+.sim-arch-desc{font-size:.72rem;color:var(--text2);line-height:1.4}
+.sim-briefing{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin:12px 0;box-shadow:var(--shadow)}
+.sim-profile{background:var(--bg-card);border:2px solid var(--accent);border-radius:var(--radius);padding:16px 18px;margin:14px 0;box-shadow:var(--shadow)}
+.sim-resp-bubble{background:var(--bg3);border-radius:var(--radius);padding:14px 18px;margin:10px 0;border-left:3px solid var(--accent)}
+.sim-resp-name{font-weight:600;font-size:.8rem;color:var(--accent);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.sim-resp-text{font-style:italic;font-size:.86rem;line-height:1.6;color:var(--text)}
+.sim-narrator{font-size:.84rem;color:var(--text2);line-height:1.6;margin:8px 0;padding:10px 14px;background:var(--bg3);border-radius:var(--radius-sm);font-style:italic}
+.sim-step-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:.75rem;font-weight:600;background:var(--purple-bg);color:var(--purple)}
+.sim-step-bar{display:flex;gap:4px;margin:10px 0 14px}
+.sim-step-dot{flex:1;height:5px;border-radius:3px;background:var(--border);transition:background .3s}
+.sim-step-dot.done{background:var(--green)}
+.sim-step-dot.current{background:var(--accent)}
+.sim-start-btn{
+  display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:var(--radius);
+  font-weight:600;font-size:.9rem;background:var(--accent);color:#fff;transition:all .2s;margin-top:12px;
+}
+.sim-start-btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.sim-restart-btn{
+  display:inline-flex;align-items:center;gap:6px;padding:10px 22px;border-radius:var(--radius);
+  font-weight:600;font-size:.85rem;background:var(--bg3);color:var(--text2);border:1px solid var(--border);
+  transition:all .2s;margin-top:10px;
+}
+.sim-restart-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ═══ BRIEFING CARD ═══ */
+.sim-briefing{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin:12px 0;box-shadow:var(--shadow)}
+
+/* ═══ NAV BUTTONS ═══ */
+.sim-nav{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 0;margin-top:20px;border-top:1px solid var(--border);
+}
+.sim-nav-btn{
+  display:inline-flex;align-items:center;gap:6px;padding:10px 20px;
+  border-radius:var(--radius);font-weight:600;font-size:.85rem;transition:all .2s;
+}
+.sim-nav-btn.primary{background:var(--accent);color:#fff}
+.sim-nav-btn.primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.sim-nav-btn.secondary{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.sim-nav-btn.secondary:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ═══ PHASE CONTAINERS ═══ */
+.phase{display:none}
+.phase.active{display:block;animation:fadeUp .4s ease}
+</style>
+</head>
+<body>
+<div id="simApp">
+
+  <!-- PHASE 1: INTRO + BRIEFING -->
+  <div class="phase active" id="phaseIntro">
+    <div class="sim-header stagger">
+      <div class="t-tag" style="background:var(--purple-bg);color:var(--purple)"><i class="fa-solid fa-gamepad"></i>&ensp;Симулятор</div>
+      <h1>Твоё первое интервью</h1>
+      <p class="subtitle">Примени все знания из&nbsp;курса в&nbsp;реалистичном интервью</p>
+    </div>
+
+    <div class="sim-briefing stagger">
+      <p class="t-body" style="margin:0;font-size:.88rem">
+        <strong><i class="fa-solid fa-file-lines" style="color:var(--accent)"></i>&ensp;Бриф исследования:</strong><br>
+        Ты&nbsp;&mdash; продакт-менеджер в&nbsp;команде мобильного банка. Ваша команда заметила, что <strong>40% клиентов&nbsp;45+</strong> не&nbsp;пользуются функцией переводов по&nbsp;номеру телефона (СМП), хотя она включена по&nbsp;умолчанию. Тебе предстоит провести <strong>проблемное интервью</strong> с&nbsp;клиентом, чтобы понять&nbsp;&mdash; почему.
+      </p>
+    </div>
+
+    <div class="metaphor-box stagger">
+      <p style="margin:0;font-size:.88rem;line-height:1.6;color:var(--text)">
+        <strong>Как это работает:</strong> Выбери архетип респондента. Тебе предстоит 7&nbsp;шагов интервью с&nbsp;выбором действий. За каждый правильный выбор начисляются баллы. Максимум&nbsp;&mdash; <strong>28&nbsp;баллов</strong>.
+      </p>
+    </div>
+
+    <div class="t-h1 mt-3" style="font-size:1.1rem"><i class="fa-solid fa-users" style="color:var(--accent)"></i>&ensp;Выбери архетип респондента</div>
+    <div id="archGrid" class="sim-grid"></div>
+    <div id="archProfile"></div>
+    <div id="startArea" class="text-center" style="margin-top:12px"></div>
+  </div>
+
+  <!-- PHASE 2: INTERVIEW -->
+  <div class="phase" id="phaseInterview">
+    <div class="ex-header">
+      <div class="ex-badge"><i class="fa-solid fa-gamepad"></i>&ensp;Симулятор интервью</div>
+      <div class="ex-score" id="simScore">0 / 28</div>
+    </div>
+    <div id="simStepBar" class="sim-step-bar"></div>
+    <div id="simContainer"></div>
+  </div>
+
+  <!-- PHASE 3: RESULTS -->
+  <div class="phase" id="phaseResults">
+    <div class="text-center stagger">
+      <div class="score-ring">
+        <svg viewBox="0 0 160 160">
+          <circle class="track" cx="80" cy="80" r="65"></circle>
+          <circle class="fill-circle" id="simScoreCircle" cx="80" cy="80" r="65"
+            stroke-dasharray="408.4" stroke-dashoffset="408.4"></circle>
+        </svg>
+        <div class="score-text">
+          <div class="score-big" id="simScoreBig">0</div>
+          <div class="score-label">из 28 баллов</div>
+        </div>
+      </div>
+      <div class="result-msg" id="simResultMsg"></div>
+      <button class="sim-restart-btn" onclick="resetAll()">
+        <i class="fa-solid fa-rotate-left"></i> Выбрать другой архетип
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script type="text/plain" id="mc">
+/* ═══ DARK MODE ═══ */
+if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.documentElement.classList.add('dark');
+}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(event) {
+    if (event.matches) { document.documentElement.classList.add('dark'); }
+    else { document.documentElement.classList.remove('dark'); }
+});
+
+/* ═══ STATE ═══ */
+var state = {
+  archetype: null,
+  currentStep: 0,
+  score: 0,
+  answered: 0,
+  done: false
+};
+
+/* ═══ DATA ═══ */
+/* ═══ SIMULATOR DATA ═══ */
+var simArchetypes = [
+  { key: 'pleaser', emoji: '😊', name: 'Угодник', color: 'var(--green)', colorBg: 'var(--green-bg)',
+    resp: 'Валентина Николаевна', age: '56 лет', role: 'бухгалтер на пенсии',
+    desc: 'Пользуется приложением 2 года. Переводы через отделение. СМП не пользовалась.' },
+  { key: 'expert', emoji: '🎓', name: 'Эксперт', color: 'var(--blue)', colorBg: 'var(--blue-bg)',
+    resp: 'Дмитрий', age: '42 года', role: 'IT-директор',
+    desc: 'Активный пользователь. Переводы через интернет-банк на компьютере. Любит давать советы.' },
+  { key: 'silent', emoji: '🤐', name: 'Молчун', color: 'var(--purple)', colorBg: 'var(--purple-bg)',
+    resp: 'Артём', age: '28 лет', role: 'инженер',
+    desc: 'Интроверт, отвечает односложно. На интервью записан коллегой. Переводит по номеру карты.' },
+  { key: 'talker', emoji: '🗣️', name: 'Болтун', color: 'var(--accent)', colorBg: 'var(--accent-bg)',
+    resp: 'Ольга Петровна', age: '52 года', role: 'учительница',
+    desc: 'Очень общительная, легко уходит от темы. Платит через отделение рядом с работой.' },
+  { key: 'skeptic', emoji: '😤', name: 'Скептик', color: 'var(--red)', colorBg: 'var(--red-bg)',
+    resp: 'Игорь', age: '38 лет', role: 'предприниматель',
+    desc: 'Недоволен сервисом, не верит в пользу интервью. Переводит поставщикам через интернет-банк.' }
+];
+
+var simStepLabels = ['Разогрев', 'Контекст', 'Работа с архетипом', 'Углубление в проблему', 'Техника', 'Работа с противоречием', 'Завершение'];
+var simStepPts = [3, 4, 4, 5, 3, 4, 5];
+
+var simScenarios = {
+  pleaser: [
+    { context: 'Валентина Николаевна подключилась к Zoom. Выглядит немного напряжённо, камера включена. Ждёт.',
+      options: [
+        { letter: 'A', text: '«Здравствуйте! Спасибо, что нашли время. Меня зовут [имя], я из команды мобильного приложения. Мне интересно поговорить о том, как вы управляете финансами. Нет правильных ответов, мне важен ваш опыт. Можно, я буду записывать?»', points: 3, explain: 'Полный разогрев: представление, цель, снятие напряжения, запрос на запись.' },
+        { letter: 'B', text: '«Добрый день! Давайте начнём. У меня вопросы про СМП-переводы — почему вы ими не пользуетесь?»', points: 0, explain: 'Нет разогрева, наводящий вопрос, давление. Респондент замкнётся.' },
+        { letter: 'C', text: '«Здравствуйте! Спасибо за время. Давайте поговорим о приложении. Нет правильных ответов.»', points: 2, explain: 'Неплохо, но нет запроса на запись и цель размыта.' }
+      ]},
+    { context: 'Валентина Николаевна расслабилась: «Ну хорошо, давайте.» Какой вопрос задашь первым?',
+      options: [
+        { letter: 'A', text: '«Расскажите, как обычно выглядит ваш день, когда нужно кому-то перевести деньги или оплатить что-то? Вспомните недавний случай.»', points: 4, explain: 'Открытый вопрос о конкретном прошлом опыте с широким контекстом — идеально для старта.' },
+        { letter: 'B', text: '«Вы знаете, что в нашем приложении есть переводы по номеру телефона?»', points: 0, explain: 'Закрытый, наводящий, сразу к решению. Вы не узнаете контекст.' },
+        { letter: 'C', text: '«Как часто вы пользуетесь нашим приложением?»', points: 2, explain: 'Закрытый вопрос, но уместный для начала. Упускает контекст поведения.' }
+      ]},
+    { context: 'Валентина Николаевна: «Ой, приложение отличное! Мне всё нравится! Очень удобно!» При этом по данным аналитики она не использует большинство функций. Ты узнаёшь архетип «Угодника».',
+      options: [
+        { letter: 'A', text: '«Рад слышать! Расскажите пошагово: вот вам нужно перевести деньги дочке. Что вы делаете? Куда идёте? Что нажимаете?»', points: 4, explain: 'Переводишь от мнений к конкретному поведению — обходишь защиту угодника.' },
+        { letter: 'B', text: '«Спасибо! А что именно нравится?»', points: 1, explain: 'Всё ещё спрашиваешь про мнение — угодник продолжит хвалить.' },
+        { letter: 'C', text: '«Но по нашим данным вы не пользуетесь переводами через приложение. Почему?»', points: 0, explain: 'Конфронтация с данными — респондент почувствует давление и замкнётся.' }
+      ]},
+    { context: 'Валентина Николаевна: «Ну, когда дочке нужно перевести — я иду в отделение. Там девочки помогут, всё сделают. Надёжно.»',
+      options: [
+        { letter: 'A', text: '«А почему не через приложение?»', points: 1, explain: '«Почему не...» звучит как обвинение. Респондент начнёт оправдываться.' },
+        { letter: 'B', text: '«Расскажите подробнее — что для вас значит "надёжно"? Была ли ситуация, когда что-то было "ненадёжно"?»', points: 5, explain: 'Следуешь за ключевым словом «надёжно» и просишь конкретику — техника глубинного вопрошания.' },
+        { letter: 'C', text: '«А вы пробовали переводить через приложение?»', points: 2, explain: 'Закрытый, но уместный. Может дать полезную информацию.' }
+      ]},
+    { context: 'Валентина Николаевна: «Ну, один раз попробовала перевести через телефон... и мне было страшно, что деньги потеряются.»',
+      options: [
+        { letter: 'A', text: '«Страшно?»', points: 3, explain: 'Техника «зеркало» — повторяешь ключевое слово, побуждая раскрыть тему глубже.' },
+        { letter: 'B', text: '«Не переживайте, переводы у нас надёжные!»', points: 0, explain: 'Ты продавец, не исследователь. Упускаешь ценнейшую информацию о страхах.' },
+        { letter: 'C', text: '«А что конкретно было страшно?»', points: 2, explain: 'Хороший вопрос, но менее элегантный, чем зеркало — чуть давит.' }
+      ]},
+    { context: 'Валентина Николаевна: «Я вообще-то люблю всё новое, технологии — это хорошо!» Но 5 минут назад рассказала, что ходит в отделение и боится переводить через телефон.',
+      options: [
+        { letter: 'A', text: '«Вы же говорили, что боитесь переводить через телефон — а теперь говорите, что любите технологии?»', points: 0, explain: 'Ловишь на противоречии — респондент почувствует себя пойманным.' },
+        { letter: 'B', text: '«Расскажите, а какие технологии вам нравятся? Чем пользуетесь с удовольствием? А есть ли что-то, к чему пока не привыкли?»', points: 4, explain: 'Мягко исследуешь противоречие через конкретику — получаешь реальную картину без давления.' },
+        { letter: 'C', text: '«Понятно.» И переходишь к следующему вопросу.', points: 1, explain: 'Упускаешь ценный момент. Противоречия — золотая жила для инсайтов.' }
+      ]},
+    { context: 'Интервью подходит к концу. Ты многое узнал о страхах Валентины Николаевны. Как завершишь?',
+      options: [
+        { letter: 'A', text: '«Спасибо! Больше вопросов нет, всего доброго!»', points: 1, explain: 'Слишком резко. Нет завершающего вопроса и следующих шагов.' },
+        { letter: 'B', text: '«Валентина Николаевна, спасибо огромное! Вы мне очень помогли. Скажите, есть ли что-то, о чём я не спросил, а вам хотелось бы сказать?» Затем поблагодари и объясни, что будет дальше.', points: 5, explain: 'Открытый завершающий вопрос + благодарность + следующие шаги — идеальное завершение.' },
+        { letter: 'C', text: '«А, и ещё: что вы думаете про кэшбэк? И про вклады? И про...»', points: 0, explain: 'Поезд ушёл — респондент устал. Новые темы в конце дадут поверхностные ответы.' }
+      ]}
+  ],
+  expert: [
+    { context: 'Дмитрий подключился уверенно: «Отлично, у меня уже есть список идей для вашего приложения! Давайте сразу к делу.»',
+      options: [
+        { letter: 'A', text: '«Отлично, давайте послушаем ваши идеи!»', points: 0, explain: 'Ты превращаешь интервью в сессию генерации фичей. Данных о проблемах не получишь.' },
+        { letter: 'B', text: '«Спасибо, Дмитрий! Идеи — это ценно, и мы обязательно к ним вернёмся. Но сначала мне важно понять ваш реальный опыт — это поможет команде принять верные решения. Можно записать разговор?»', points: 3, explain: 'Признаёшь вклад, но переориентируешь на опыт. Полный разогрев с запросом на запись.' },
+        { letter: 'C', text: '«Мы сейчас не за идеями, а за исследованием.»', points: 1, explain: 'Верная мысль, но звучит резко и отталкивающе. Респондент может замкнуться.' }
+      ]},
+    { context: 'Дмитрий: «Ну вот слушайте, вам надо сделать биометрию по лицу для переводов, как в Китае. И ещё добавить AI-ассистента...»',
+      options: [
+        { letter: 'A', text: '«Интересно! А расскажите, как выглядел ваш последний перевод? Кому переводили, как это происходило?»', points: 4, explain: 'Мягкий мост от идей к реальному опыту — направляешь эксперта в режим рассказчика.' },
+        { letter: 'B', text: '«Как часто вы делаете переводы в нашем приложении?»', points: 2, explain: 'Перенаправляет, но закрытый вопрос. Эксперт может опять уйти в советы.' },
+        { letter: 'C', text: '«Запишем! Какие ещё есть идеи?»', points: 0, explain: 'Ты поощряешь режим советчика — интервью превращается в сбор хотелок.' }
+      ]},
+    { context: 'Дмитрий: «Вам нужно сделать API для автоматических переводов. Я как IT-директор понимаю архитектуру...»',
+      options: [
+        { letter: 'A', text: '«Интересная мысль. А расскажите, с какой ситуацией из вашего опыта это связано? Когда вам не хватало автоматизации?»', points: 4, explain: 'Признаёшь экспертизу и мягко переводишь из режима «советчик» в режим «рассказчик».' },
+        { letter: 'B', text: '«У нас уже есть планы по API.»', points: 0, explain: 'Ты закрыл тему, не узнав, какая проблема стоит за предложением.' },
+        { letter: 'C', text: '«А какие ещё функции добавили бы?»', points: 1, explain: 'Ты всё ещё собираешь фичи, а не исследуешь проблемы.' }
+      ]},
+    { context: 'Дмитрий наконец рассказывает: «Ну, раз в месяц перевожу деньги маме. Делаю через интернет-банк на компьютере — привык так.»',
+      options: [
+        { letter: 'A', text: '«Почему не через мобильное приложение?»', points: 1, explain: '«Почему не...» звучит как обвинение, особенно для IT-директора.' },
+        { letter: 'B', text: '«Расскажите подробнее: вы за компьютером, что открываете, что нажимаете? Что удобно, а где есть трение?»', points: 5, explain: 'Просишь конкретный пошаговый рассказ — получаешь реальные данные о поведении и болях.' },
+        { letter: 'C', text: '«Сколько обычно переводите?»', points: 2, explain: 'Уместный уточняющий вопрос, но упускает возможность для глубины.' }
+      ]},
+    { context: 'Дмитрий: «В приложении переводы работают, но... не знаю, на компьютере как-то спокойнее.»',
+      options: [
+        { letter: 'A', text: '«Спокойнее?»', points: 3, explain: 'Техника «зеркало» — минимальный вопрос, максимальный эффект. Дмитрий раскроет, что стоит за этим словом.' },
+        { letter: 'B', text: '«Мобильное приложение не менее безопасно, чем компьютер.»', points: 0, explain: 'Ты продаёшь, а не исследуешь. Упускаешь ценную информацию о восприятии.' },
+        { letter: 'C', text: '«Вы пробовали СМП-переводы по номеру телефона?»', points: 2, explain: 'Закрытый вопрос, уводящий от интересной темы «спокойствия».' }
+      ]},
+    { context: 'Дмитрий: «Я IT-директор, для меня технологии — это жизнь. Я всегда за digital.» Но только что рассказал, что предпочитает компьютер мобильному приложению.',
+      options: [
+        { letter: 'A', text: '«Но вы же только что сказали, что предпочитаете компьютер...»', points: 0, explain: 'Ловишь на противоречии — IT-директор может обидеться и закрыться.' },
+        { letter: 'B', text: '«Интересно: вы упомянули, что переводите с компьютера. Что заставляет выбирать компьютер вместо телефона в такие моменты?»', points: 4, explain: 'Мягко исследуешь противоречие через конкретный вопрос, без обвинений.' },
+        { letter: 'C', text: '«Понятно.» И двигаешься дальше.', points: 1, explain: 'Упускаешь ценнейшее противоречие между самоидентификацией и поведением.' }
+      ]},
+    { context: 'Интервью подходит к концу. Дмитрий раскрылся и рассказал много интересного. Как завершишь?',
+      options: [
+        { letter: 'A', text: '«Спасибо, Дмитрий! Это было полезно. До свидания!»', points: 1, explain: 'Нет завершающего вопроса — упускаешь то, что респондент хотел сказать.' },
+        { letter: 'B', text: '«Дмитрий, спасибо! И за опыт, и за идеи — всё передам команде. Скажите, есть ли что-то важное, о чём я не спросил? Что-то о вашем опыте с переводами?»', points: 5, explain: 'Благодаришь за обе грани (идеи + опыт), задаёшь открытый финальный вопрос.' },
+        { letter: 'C', text: '«Можете прислать ваш список идей на почту?»', points: 0, explain: 'Возвращаешь респондента в режим советчика — всё интервью насмарку.' }
+      ]}
+  ],
+  silent: [
+    { context: 'Артём подключился. Камера выключена. Молчит. Ждёт.',
+      options: [
+        { letter: 'A', text: '«Привет, Артём! Спасибо, что согласился. Меня зовут [имя], я из команды мобильного банка. Хочу расспросить тебя о том, как ты переводишь деньги — буквально 20-25 минут. Нет правильных ответов. Кстати, ты как сегодня — был занятой день?»', points: 3, explain: 'Полный разогрев + лёгкий вопрос для разминки. Помогает молчуну начать говорить.' },
+        { letter: 'B', text: '«Привет! Давай начнём. Почему ты не пользуешься СМП?»', points: 0, explain: 'Без разогрева, закрытый и наводящий вопрос. Молчун закроется ещё больше.' },
+        { letter: 'C', text: '«Привет! Есть время на вопросы?»', points: 2, explain: 'Вежливо, но слишком коротко — не снимает напряжение и не объясняет формат.' }
+      ]},
+    { context: 'Артём: «Ну... нормально.» (ответ на вопрос об опыте использования приложения)',
+      options: [
+        { letter: 'A', text: '«Скажи, а вот последний раз, когда ты открывал приложение — что это было? Вчера? Позавчера? Что делал?»', points: 4, explain: 'Максимально конкретный вопрос — молчуну проще ответить на что-то конкретное, чем на абстрактное.' },
+        { letter: 'B', text: '«Что значит "нормально"?»', points: 2, explain: 'Неплохо, но слишком абстрактно — молчун может снова ответить односложно.' },
+        { letter: 'C', text: '«Ок. Тебе нравится приложение?»', points: 0, explain: 'Закрытый вопрос — получишь «да» или «нормально» снова.' }
+      ]},
+    { context: 'Артём: «Деньги перевожу. Всё.» Односложные ответы продолжаются.',
+      options: [
+        { letter: 'A', text: '«Понятно. Когда переводишь деньги — ты обычно делаешь это сразу, как нужно, или откладываешь на потом?»', points: 4, explain: 'Техника «выбор из двух» — даёшь конкретные варианты, молчуну проще начать говорить.' },
+        { letter: 'B', text: 'Выдерживаешь паузу 5 секунд.', points: 2, explain: 'Пауза может сработать, но с молчуном на раннем этапе рискованно — он может просто молчать дальше.' },
+        { letter: 'C', text: '«А что значит "всё"? Что ещё делаешь в приложении?»', points: 0, explain: 'Звучит как давление. Молчун будет отвечать ещё короче.' }
+      ]},
+    { context: 'Артём (потихоньку раскрывается): «Обычно по номеру карты перевожу. Ввожу все цифры.»',
+      options: [
+        { letter: 'A', text: '«Расскажи пошагово: ты открываешь приложение, нажимаешь "Перевод"... Что делаешь дальше? Откуда берёшь номер карты? Сколько времени это занимает?»', points: 5, explain: 'Ультра-конкретные вопросы по шагам — молчун начинает описывать реальное поведение.' },
+        { letter: 'B', text: '«Почему по номеру карты, а не по номеру телефона?»', points: 1, explain: '«Почему» ощущается как давление для молчуна — лучше спросить «как».' },
+        { letter: 'C', text: '«А ты слышал про переводы по СМП?»', points: 2, explain: 'Закрытый, но уместный. Выясняет осведомлённость, но не углубляется в поведение.' }
+      ]},
+    { context: 'Артём: «Ну, открываю, ввожу номер карты... Долго это, конечно.» После слова «долго» замолчал.',
+      options: [
+        { letter: 'A', text: 'Ждёшь 5 секунд в тишине.', points: 3, explain: 'Техника паузы — молчуну нужно время, и после паузы он часто дополняет самым ценным.' },
+        { letter: 'B', text: '«Что именно долго? Сколько времени занимает?»', points: 2, explain: 'Хороший вопрос, но прерывает потенциальное продолжение мысли.' },
+        { letter: 'C', text: '«Есть более быстрый способ — по номеру телефона!»', points: 0, explain: 'Ты продавец, не исследователь. Упускаешь возможность узнать, что стоит за словом «долго».' }
+      ]},
+    { context: 'Артём: «Мне всё равно, каким способом переводить.» Но ранее говорил, что вводить номер карты «долго».',
+      options: [
+        { letter: 'A', text: '«Ты говорил, что вводить номер карты долго. Бывали случаи, когда из-за этого откладывал перевод или он не получался с первого раза?»', points: 4, explain: 'Мягко исследуешь противоречие через конкретную ситуацию — без давления.' },
+        { letter: 'B', text: '«Но ты же сказал, что это долго...»', points: 0, explain: 'Ловишь на противоречии — молчун снова замкнётся.' },
+        { letter: 'C', text: '«Понятно.» Двигаешься дальше.', points: 1, explain: 'Упускаешь ценное противоречие между «всё равно» и реальным неудобством.' }
+      ]},
+    { context: 'Интервью подходит к концу. Артём начал говорить чуть больше. Как завершишь?',
+      options: [
+        { letter: 'A', text: '«Спасибо, Артём! Это было полезно. Пока!»', points: 1, explain: 'Нет завершающего вопроса. С молчуном важно дать последний шанс высказаться.' },
+        { letter: 'B', text: '«Артём, спасибо тебе — эти детали для нас реально важны. Может, есть что-то ещё? Что-то раздражает в приложении или, наоборот, нравится?»', points: 5, explain: 'Подчёркиваешь ценность его ответов (мотивация для интроверта) + открытый финальный вопрос.' },
+        { letter: 'C', text: '«Можем созвониться ещё раз на следующей неделе? У меня остались вопросы.»', points: 0, explain: 'Молчун и так с трудом согласился на это интервью — не проси больше.' }
+      ]}
+  ],
+  talker: [
+    { context: 'Ольга Петровна подключилась и сразу начала рассказывать о погоде, потом о кошке, потом о соседке.',
+      options: [
+        { letter: 'A', text: '«Ольга Петровна, рада знакомству! Вижу, у вас насыщенная жизнь! У нас 30 минут — давайте я коротко расскажу, о чём поговорим: мне интересен ваш опыт с переводами и платежами. Нет правильных ответов. Можно записать?»', points: 3, explain: 'Тёплый контакт + чёткие рамки по времени. С болтуном структура — спасение.' },
+        { letter: 'B', text: 'Подождать, пока выговорится — скоро перейдёт к теме.', points: 0, explain: 'Болтун не перейдёт к теме сам. Через 15 минут ты так и будешь слушать про кошку.' },
+        { letter: 'C', text: '«Давайте начнём. Расскажите о вашем банковском приложении.»', points: 2, explain: 'Перенаправляет, но слишком резко — нет тёплого контакта и рамок по времени.' }
+      ]},
+    { context: 'Ольга Петровна: «Ой, приложение! Вчера как раз рассказывала коллеге Маше — она знаете какая, мы с ней 15 лет работаем, ещё со школы на Сокольниках...»',
+      options: [
+        { letter: 'A', text: '«Кстати, раз уж вы о коллегах — вы когда-нибудь переводили деньги кому-то из коллег? Расскажите, как это было.»', points: 4, explain: 'Техника «моста» — зацепляешься за ключевое слово из её рассказа и переводишь к теме.' },
+        { letter: 'B', text: '«Ольга Петровна, давайте сфокусируемся на теме.»', points: 0, explain: 'Грубо — болтун обидится или смутится. Ты потеряешь контакт.' },
+        { letter: 'C', text: '«Вы часто пользуетесь банковским приложением?»', points: 2, explain: 'Перенаправляет, но упускает возможность использовать мост — болтун может снова уйти.' }
+      ]},
+    { context: 'Ольга Петровна: «Ой да, Маше на день рождения переводила! Это было в марте, как раз у нас тогда была контрольная у 7-Б, они такие непослушные, Петров опять двойку получил...»',
+      options: [
+        { letter: 'A', text: '«Кстати о переводе Маше — как именно вы его делали? Через приложение? Через отделение? Расскажите по шагам.»', points: 4, explain: 'Ре-якоришь на ключевую деталь (перевод) из потока речи — возвращаешь к теме без грубости.' },
+        { letter: 'B', text: 'Ждать, пока закончит рассказ.', points: 0, explain: 'Болтун не закончит — история Петрова перетечёт в другую историю.' },
+        { letter: 'C', text: '«Ольга Петровна, давайте вернёмся к переводу.»', points: 1, explain: 'Прямолинейно, может вызвать неловкость, но хотя бы возвращает к теме.' }
+      ]},
+    { context: 'Ольга Петровна: «Маше перевела через отделение, конечно. Там рядом со школой наш банк — удобно по дороге.»',
+      options: [
+        { letter: 'A', text: '«Почему через отделение, а не через приложение?»', points: 1, explain: '«Почему не...» — обвинительная конструкция. С болтуном даст пространную речь не по делу.' },
+        { letter: 'B', text: '«Расскажите подробнее: вот вы пришли в отделение — что происходило? Сколько времени заняло? Удобно ли было?»', points: 5, explain: 'Конкретные вопросы о реальном опыте — болтун будет рассказывать по делу, потому что есть чёткая рамка.' },
+        { letter: 'C', text: '«Часто ходите в отделение?»', points: 2, explain: 'Закрытый вопрос. С болтуном сработает, но не углубляется в опыт.' }
+      ]},
+    { context: 'Ольга Петровна: «В очереди стояла минут 20... а знаете, там ещё ремонт начали, все стулья вынесли! Вот я стою, ноги болят, и думаю...»',
+      options: [
+        { letter: 'A', text: '«20 минут в очереди — это бывает часто? Как вы к этому относитесь?»', points: 3, explain: 'Ловишь эмоцию (ноги болят) и конкретику (20 минут) — перенаправляешь без потери эмпатии.' },
+        { letter: 'B', text: '«А дальше что было?»', points: 2, explain: 'Даёт продолжить, но рискуешь уйти в рассказ о ремонте банка.' },
+        { letter: 'C', text: '«20 минут — долго. Пробовали переводить через приложение?»', points: 0, explain: 'Прыгаешь к решению — ещё не понял проблему полностью.' }
+      ]},
+    { context: 'Ольга Петровна: «Я вообще-то люблю всё делать через телефон! Звоню, WhatsApp, фотографии внукам отправляю...» Но только что рассказала, как 20 минут стояла в очереди ради перевода.',
+      options: [
+        { letter: 'A', text: '«Интересно — вы любите телефон для общения, но для переводов ходите в отделение. Что для вас отличает финансовые операции от остальных?»', points: 4, explain: 'Исследуешь противоречие через контраст — мягко и уважительно.' },
+        { letter: 'B', text: '«Так почему же тогда не переводите через телефон?»', points: 0, explain: 'Обвинительный тон — болтун начнёт оправдываться или уйдёт в другую историю.' },
+        { letter: 'C', text: 'Пропускаешь момент.', points: 1, explain: 'Упускаешь ценное противоречие между «я люблю телефон» и реальным поведением.' }
+      ]},
+    { context: 'Интервью подходит к концу. Ольга Петровна наговорила много, но ты вычленил полезное. Как завершишь?',
+      options: [
+        { letter: 'A', text: '«Спасибо, Ольга Петровна! Пока-пока!»', points: 1, explain: 'Нет завершающего вопроса — болтун мог бы сказать что-то важное напоследок.' },
+        { letter: 'B', text: '«Ольга Петровна, спасибо огромное за ваше время и все истории! Один последний вопрос: есть ли что-то важное о вашем опыте с банком, о чём я не спросила?»', points: 5, explain: 'Тёплое завершение + открытый финальный вопрос. Болтун оценит внимание.' },
+        { letter: 'C', text: '«Ой, мы уже перебрали по времени. Спасибо, до свидания!»', points: 0, explain: 'Резкий обрыв — болтун почувствует, что его не ценят.' }
+      ]}
+  ],
+  skeptic: [
+    { context: 'Игорь подключился с хмурым лицом: «Ну давайте, только быстро. Я уже три таких интервью проходил — ничего не меняется.»',
+      options: [
+        { letter: 'A', text: '«Я понимаю, Игорь. Этот разговор напрямую влияет на команду, которая делает приложение — конкретные решения принимаются на следующей неделе. Ваш опыт реально важен. Давайте так: 25 минут, я спрошу о вашем опыте с переводами. Можно записать?»', points: 3, explain: 'Признаёшь опыт, даёшь конкретику про влияние, ставишь временные рамки. Скептик ценит честность.' },
+        { letter: 'B', text: '«Давайте быстро. Почему вы не используете СМП?»', points: 0, explain: 'Без разогрева, наводящий вопрос. Скептик подумает: «Ну вот, опять формальность.»' },
+        { letter: 'C', text: '«Простите за прошлый опыт. Мы постараемся в этот раз лучше.»', points: 2, explain: 'Эмпатично, но расплывчато. Скептику нужны факты, а не обещания.' }
+      ]},
+    { context: 'Игорь: «Я предприниматель. Каждый день переводы поставщикам, сотрудникам. И ваше приложение, скажем так, не помогает.»',
+      options: [
+        { letter: 'A', text: '«Что именно не помогает? Расскажите про вчера — какие переводы нужно было сделать и как это прошло?»', points: 4, explain: 'Следуешь за негативом к конкретике — скептик с удовольствием расскажет о проблемах.' },
+        { letter: 'B', text: '«Какие функции нужно добавить, чтобы помогало?»', points: 0, explain: 'Прыгаешь к решениям — не поняв глубины проблемы.' },
+        { letter: 'C', text: '«Извините. А пользуетесь переводами по номеру телефона?»', points: 1, explain: 'Извинения неуместны (ты не виноват), и сразу к узкой теме — упускаешь контекст.' }
+      ]},
+    { context: 'Игорь: «Слушайте, вы вообще сами-то пользуетесь своим приложением? Видели, что происходит утром? Всё висит!»',
+      options: [
+        { letter: 'A', text: '«Это серьёзная проблема. Расскажите подробнее — что именно происходит утром? Как часто вы с этим сталкиваетесь?»', points: 4, explain: 'Не споришь, не оправдываешься. Признаёшь проблему и углубляешься в детали.' },
+        { letter: 'B', text: '«Наше приложение работает стабильно. Может, дело в интернет-соединении?»', points: 0, explain: 'Защищаешь компанию — скептик окончательно закроется. Это не работа исследователя.' },
+        { letter: 'C', text: '«Я передам это техническому отделу.»', points: 1, explain: 'Формально OK, но упускаешь возможность узнать подробности и контекст.' }
+      ]},
+    { context: 'Игорь (раскрываясь): «Вчера нужно было перевести поставщику 50 тысяч. Открыл приложение, начал вводить реквизиты... и тут оно зависло. Пришлось звонить в отделение.»',
+      options: [
+        { letter: 'A', text: '«Что произошло дальше? Как решил вопрос? Сколько времени ушло на это?»', points: 5, explain: 'Следуешь за конкретной историей — просишь продолжить нарратив. Получаешь полную картину.' },
+        { letter: 'B', text: '«Как часто приложение зависает?»', points: 2, explain: 'Квантифицируешь, но теряешь нить конкретной истории.' },
+        { letter: 'C', text: '«Попробуйте переустановить приложение.»', points: 0, explain: 'Ты техподдержка, не исследователь. Респондент разочаруется окончательно.' }
+      ]},
+    { context: 'Игорь: «Позвонил в отделение, попросил менеджера сделать перевод. Нервы потратил...»',
+      options: [
+        { letter: 'A', text: '«Нервы?»', points: 3, explain: 'Техника «зеркало» — короткий повтор эмоционального слова побуждает раскрыть глубину.' },
+        { letter: 'B', text: '«В итоге перевод прошёл?»', points: 2, explain: 'Нормальный вопрос, но поверхностный — не исследует эмоцию.' },
+        { letter: 'C', text: '«Это, наверное, было очень неудобно для бизнеса.»', points: 0, explain: 'Наводящий — ты вкладываешь свою интерпретацию. Дай респонденту рассказать самому.' }
+      ]},
+    { context: 'Игорь: «Вообще, я считаю, что все эти digital-банки — фигня. Надо в отделение ходить.» Но ранее описал, как первым делом открыл приложение для перевода.',
+      options: [
+        { letter: 'A', text: '«Кстати, ты рассказывал, что вчера первым делом открыл приложение. Что заставляет начинать именно с приложения, а не звонить в отделение сразу?»', points: 4, explain: 'Мягко исследуешь противоречие — скептик осознаёт, что на самом деле предпочитает digital.' },
+        { letter: 'B', text: '«Но вы же сами пользуетесь приложением...»', points: 0, explain: 'Ловишь — скептик будет защищаться, а не рефлексировать.' },
+        { letter: 'C', text: '«Понятно.» Двигаешься дальше.', points: 1, explain: 'Упускаешь ценное противоречие между декларацией и поведением.' }
+      ]},
+    { context: 'Интервью подходит к концу. Игорь раскрылся и рассказал много реальных историй. Как завершишь?',
+      options: [
+        { letter: 'A', text: '«Спасибо за время!»', points: 1, explain: 'Слишком коротко для скептика, который наконец раскрылся.' },
+        { letter: 'B', text: '«Игорь, спасибо. Я слышу, что у тебя накопилось много реального опыта. Именно такие истории помогают нам принимать верные решения. Есть ли что-то ещё, что важно знать? Я передам конкретные выводы команде разработки.»', points: 5, explain: 'Ценишь откровенность скептика, конкретизируешь влияние + открытый финальный вопрос.' },
+        { letter: 'C', text: '«Я сделаю так, чтобы все ваши проблемы были решены.»', points: 0, explain: 'Не давай обещаний, которые не можешь выполнить. Ты исследователь, не служба поддержки.' }
+      ]}
+  ]
+};
+
+
+/* ═══ PHASES ═══ */
+function showPhase(id) {
+  var phases = document.querySelectorAll('.phase');
+  for (var i = 0; i < phases.length; i++) { phases[i].classList.remove('active'); }
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+/* ═══ ARCHETYPE SELECTION ═══ */
+function renderArchGrid() {
+  var html = '';
+  simArchetypes.forEach(function(a) {
+    html += '<div class="sim-arch-card" id="arch-' + a.key + '" onclick="selectArch(\'' + a.key + '\')">' +
+      '<div class="sim-avatar" style="background:' + a.colorBg + '">' + a.emoji + '</div>' +
+      '<div class="sim-arch-name">' + a.name + '</div>' +
+      '<div class="sim-arch-desc">' + a.resp + ', ' + a.age + '</div>' +
+    '</div>';
+  });
+  document.getElementById('archGrid').innerHTML = html;
+}
+
+function selectArch(key) {
+  state.archetype = key;
+  state.currentStep = 0;
+  state.score = 0;
+  state.answered = 0;
+  state.done = false;
+
+  var cards = document.querySelectorAll('.sim-arch-card');
+  for (var i = 0; i < cards.length; i++) { cards[i].classList.remove('selected'); }
+  document.getElementById('arch-' + key).classList.add('selected');
+
+  var arch = null;
+  simArchetypes.forEach(function(a) { if (a.key === key) arch = a; });
+
+  document.getElementById('archProfile').innerHTML =
+    '<div class="sim-profile" style="display:flex;gap:14px;align-items:center;margin-top:12px">' +
+      '<div class="sim-avatar" style="font-size:1.3rem;background:' + arch.colorBg + '">' + arch.emoji + '</div>' +
+      '<div><div style="font-weight:600;font-size:.92rem">' + arch.resp + '</div>' +
+        '<div style="font-size:.8rem;color:var(--text2)">' + arch.age + ', ' + arch.role + '</div></div>' +
+    '</div>' +
+    '<p style="font-size:.84rem;color:var(--text2);margin-top:8px;line-height:1.55">' + arch.desc + '</p>';
+
+  document.getElementById('startArea').innerHTML =
+    '<button class="sim-start-btn" onclick="startInterview()">' +
+      '<i class="fa-solid fa-play"></i> Начать интервью' +
+    '</button>';
+}
+
+function startInterview() {
+  showPhase('phaseInterview');
+  state.currentStep = 0;
+  renderStep();
+}
+
+/* ═══ INTERVIEW STEPS ═══ */
+function renderStep() {
+  var step = state.currentStep;
+  var d = simScenarios[state.archetype][step];
+  var arch = null;
+  simArchetypes.forEach(function(a) { if (a.key === state.archetype) arch = a; });
+  var container = document.getElementById('simContainer');
+
+  var barEl = document.getElementById('simStepBar');
+  var barHtml = '';
+  for (var b = 0; b < 7; b++) {
+    var cls = 'sim-step-dot';
+    if (b < step) cls += ' done';
+    else if (b === step) cls += ' current';
+    barHtml += '<div class="' + cls + '"></div>';
+  }
+  barEl.innerHTML = barHtml;
+
+  var html = '<div class="sim-step-badge">' +
+    '<i class="fa-solid fa-shoe-prints"></i>&ensp;Шаг ' +
+    (step + 1) + ' из 7: ' + simStepLabels[step] + '</div>';
+
+  html += '<div class="sim-narrator">' + d.context + '</div>';
+
+  if (step > 0) {
+    html += '<div class="sim-resp-bubble">' +
+      '<div class="sim-resp-name">' +
+        '<div style="font-size:.95rem">' + arch.emoji + '</div>' +
+        '<span style="font-size:.85rem">' + arch.resp + ' (' + arch.name + ')</span></div>';
+    if (d.response) {
+      html += '<div class="sim-resp-text">' + d.response + '</div>';
+    }
+    html += '</div>';
+  }
+
+  html += '<p class="t-body mt-3" style="font-weight:600">Что выбираешь?</p>';
+  html += '<div id="simOptions" style="margin-top:10px">';
+
+  d.options.forEach(function(opt, idx) {
+    html += '<div class="option-card" id="simOpt' + idx + '" onclick="answerStep(' + idx + ')">' +
+      '<div class="option-letter">' + opt.letter + '</div>' +
+      '<div><div class="option-text">' + opt.text + '</div></div></div>';
+  });
+  html += '</div><div id="simFeedback"></div>';
+  container.innerHTML = html;
+}
+
+function answerStep(idx) {
+  var step = state.currentStep;
+  var d = simScenarios[state.archetype][step];
+  var opt = d.options[idx];
+
+  var cards = document.querySelectorAll('#simOptions .option-card');
+  for (var i = 0; i < cards.length; i++) { cards[i].classList.add('answered'); }
+
+  var best = 0;
+  d.options.forEach(function(o) { if (o.points > best) best = o.points; });
+
+  if (opt.points === best) {
+    document.getElementById('simOpt' + idx).classList.add('correct-ans');
+  } else if (opt.points > 0) {
+    document.getElementById('simOpt' + idx).classList.add('selected');
+  } else {
+    document.getElementById('simOpt' + idx).classList.add('wrong-ans');
+  }
+
+  state.score += opt.points;
+  state.answered++;
+  document.getElementById('simScore').textContent = state.score + ' / 28';
+
+  var fbClass = opt.points === best ? 'ok' : (opt.points > 0 ? 'partial' : 'fail');
+  var fb = document.getElementById('simFeedback');
+  fb.innerHTML = '<div class="situation-feedback ' + fbClass + '">' +
+    '<strong>+' + opt.points + ' ' + declPts(opt.points) + '.</strong> ' + opt.explain + '</div>' +
+    '<button class="sim-start-btn" style="margin-top:10px" onclick="' +
+    (step < 6 ? 'nextStep()' : 'showResults()') + '">' +
+    (step < 6 ? 'Далее <i class="fa-solid fa-arrow-right"></i>' : 'Завершить <i class="fa-solid fa-check"></i>') +
+    '</button>';
+}
+
+function declPts(n) {
+  if (n >= 11 && n <= 14) return 'баллов';
+  var last = n % 10;
+  if (last === 1) return 'балл';
+  if (last >= 2 && last <= 4) return 'балла';
+  return 'баллов';
+}
+
+function nextStep() {
+  state.currentStep++;
+  renderStep();
+  window.scrollTo(0, 0);
+}
+
+function showResults() {
+  state.done = true;
+  showPhase('phaseResults');
+  var pct = Math.round((state.score / 28) * 100);
+  document.getElementById('simScoreBig').textContent = state.score;
+  var circ = 2 * Math.PI * 65;
+  var offset = circ - (circ * pct / 100);
+  document.getElementById('simScoreCircle').style.strokeDashoffset = offset;
+
+  var msg = document.getElementById('simResultMsg');
+  if (pct >= 80) {
+    msg.style.background = 'var(--green-bg)';
+    msg.style.color = 'var(--green)';
+    msg.style.borderLeft = '3px solid var(--green)';
+    msg.innerHTML = '\u{1F389} <strong>Отличный результат!</strong> Ты набрал ' + state.score + ' из 28 баллов (' + pct + '%). Ты хорошо владеешь техниками интервью.';
+  } else if (pct >= 50) {
+    msg.style.background = 'var(--accent-bg)';
+    msg.style.color = 'var(--accent)';
+    msg.style.borderLeft = '3px solid var(--accent)';
+    msg.innerHTML = '\u{1F44D} <strong>Хороший старт!</strong> Ты набрал ' + state.score + ' из 28 (' + pct + '%). Рекомендуем попробовать с другим архетипом.';
+  } else {
+    msg.style.background = 'var(--red-bg)';
+    msg.style.color = 'var(--red)';
+    msg.style.borderLeft = '3px solid var(--red)';
+    msg.innerHTML = '\u{1F4D6} <strong>Ты набрал ' + state.score + ' из 28 (' + pct + '%).</strong> Не расстраивайся! Попробуй пройти с другим архетипом.';
+  }
+}
+
+function resetAll() {
+  state.archetype = null;
+  state.currentStep = 0;
+  state.score = 0;
+  state.answered = 0;
+  state.done = false;
+  document.getElementById('simScore').textContent = '0 / 28';
+  document.getElementById('archProfile').innerHTML = '';
+  document.getElementById('startArea').innerHTML = '';
+  showPhase('phaseIntro');
+  renderArchGrid();
+}
+
+/* ═══ INIT ═══ */
+renderArchGrid();
+</script>
+<script>(function(){var s=document.createElement("script");s.textContent=document.getElementById("mc").textContent;document.head.appendChild(s);})();</script>
+</body>
+</html>
