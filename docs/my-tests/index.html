@@ -4290,18 +4290,24 @@ function showFinalResults() {
     msg.innerHTML = '\u{1F4D6} <strong>Ты набрал ' + total + ' из 87 (' + pct + '%).</strong> Не расстраивайся \u2014 исследования это навык! Рекомендуем повторить теорию и пройти курс ещё раз. Для допуска к тренингу нужно 80%.';
   }
 
-  // ==========================================
-  // 2. ОТПРАВКА ДАННЫХ В GOOGLE ТАБЛИЦУ
-  // ==========================================
+  // 2. ОТПРАВКА ДАННЫХ В GOOGLE ТАБЛИЦУ (С ПОДДЕРЖКОЙ УНИКАЛЬНОГО ID)
   try {
     var answersString = "М1: " + m1 + ", М2: " + m2 + ", М3: " + m3 + ", М4: " + m4 + ", М5: " + m5;
     
+    // Генерируем или берем старый уникальный ID пользователя
+    var userId = localStorage.getItem('course_user_id');
+    if (!userId) {
+      userId = 'ID-' + Math.floor(Math.random() * 100000000) + '-' + Date.now().toString().slice(-4);
+      localStorage.setItem('course_user_id', userId);
+    }
+    
     var payload = {
-      name: "Пользователь курса",
+      name: "Пользователь " + userId, // Будет отправлять например: Пользователь ID-4829104-4819
       score: total + " из 87 (" + pct + "%)",
       answers: answersString
     };
 
+    // Вставьте вашу рабочую ссылку /exec в кавычки ниже:
     fetch('https://script.google.com/macros/s/AKfycbzTmaXC5fp_9MO3c7NPL7--N4K9x8HDCK44bW8Ur8lTIhHUHZvD1-Sac7czYeuLIijA/exec', {
       method: 'POST',
       mode: 'no-cors',
@@ -4313,8 +4319,6 @@ function showFinalResults() {
   } catch (e) {
     console.error("Ошибка отправки данных в таблицу: ", e);
   }
-  // ==========================================
-}
 
 /* ═══ NAVIGATION ═══ */
 
