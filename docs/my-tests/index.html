@@ -4283,6 +4283,31 @@ function showFinalResults() {
     msg.style.borderLeft = '3px solid var(--red)';
     msg.innerHTML = '\u{1F4D6} <strong>Ты набрал ' + total + ' из 87 (' + pct + '%).</strong> Не расстраивайся \u2014 исследования это навык! Рекомендуем повторить теорию и пройти курс ещё раз. Для допуска к тренингу нужно 80%.';
   }
+
+  // ==========================================
+  // ОТПРАВКА ДАННЫХ В GOOGLE ТАБЛИЦУ
+  // ==========================================
+  try {
+    var answersString = "М1: " + m1 + ", М2: " + m2 + ", М3: " + m3 + ", М4: " + m4 + ", М5: " + m5;
+    
+    var payload = {
+      name: "Пользователь курса",
+      score: total + " из 87 (" + pct + "%)",
+      answers: answersString
+    };
+
+    fetch('https://script.google.com/macros/s/AKfycbzTmaXC5fp_9MO3c7NPL7--N4K9x8HDCK44bW8Ur8lTIhHUHZvD1-Sac7czYeuLIijA/exec', {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+  } catch (e) {
+    console.error("Ошибка отправки данных в таблицу: ", e);
+  }
+  // ==========================================
 }
 
 /* ═══ NAVIGATION ═══ */
