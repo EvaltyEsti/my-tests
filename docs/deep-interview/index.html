@@ -3925,10 +3925,10 @@ function answerM4Ex2(idx) {
   if (q < m4ex2Data.length - 1) {
     fb.innerHTML += '<button class="ex1-next-btn" onclick="nextM4Ex2()">Следующая ситуация <i class="fa-solid fa-arrow-right"></i></button>';
   } else {
-    state.m4ex2.currentQ++;
-    setTimeout(function() { renderM4Ex2(); }, 800);
+    fb.innerHTML += '<button class="ex1-next-btn" onclick="nextM4Ex2()">Завершить задание <i class="fa-solid fa-check"></i></button>';
   }
 }
+
 function nextM4Ex2() { state.m4ex2.currentQ++; renderM4Ex2(); }
 
 function renderM4Ex3() {
