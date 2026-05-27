@@ -3628,8 +3628,7 @@ function answerM3Ex1(idx) {
   if (q < m3ex1Data.length - 1) {
     fb.innerHTML += '<button class="ex1-next-btn" onclick="nextM3Ex1()">Следующий вопрос <i class="fa-solid fa-arrow-right"></i></button>';
   } else {
-    state.m3ex1.currentQ++;
-    setTimeout(function() { renderM3Ex1(); }, 800);
+    fb.innerHTML += '<button class="ex1-next-btn" onclick="nextM3Ex1()">Завершить задание <i class="fa-solid fa-check"></i></button>';
   }
 }
 function nextM3Ex1() { state.m3ex1.currentQ++; renderM3Ex1(); }
