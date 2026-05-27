@@ -4104,6 +4104,13 @@ function answerM5Ex1(cardIdx, answer) {
   if (state.m5ex1.answered === m5ex1Data.length) {
     state.m5ex1.done = true;
     updateNav();
+    
+    // Показываем плашку завершения внизу или вместо контейнера
+    var container = document.getElementById('m5ex1Container');
+    container.innerHTML += '<div class="card text-center" style="padding:30px; margin-top:20px; width:100%;">' +
+      '<div style="font-size:2rem;margin-bottom:10px">✅</div>' +
+      '<div class="t-h3">Задание завершено!</div>' +
+      '<p class="t-small">Вы набрали <strong>' + state.m5ex1.score + ' из 6</strong> баллов</p></div>';
   }
 }
 
