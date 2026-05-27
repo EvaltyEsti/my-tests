@@ -2904,7 +2904,19 @@ function answerEx2(idx, answer) {
 /* ═══ EXERCISE 3 FUNCTIONS ═══ */
 
 function renderEx3() {
-  if (state.ex3.done) return;
+  // СБРОС СОСТОЯНИЯ ДЛЯ ПОВТОРНОГО ПРОХОЖДЕНИЯ:
+  if (!state.ex3.done) {
+    state.ex3.selected = null;
+    state.ex3.score = 0;
+    // Очищаем старый фидбек и прячем кнопку отправки, если они остались от прошлого раза
+    var fb = document.getElementById('ex3Feedback');
+    if (fb) fb.innerHTML = '';
+    var btn = document.getElementById('ex3Submit');
+    if (btn) btn.classList.add('hidden');
+  } else {
+    return; // Если задание уже официально завершено в этой сессии, ничего не делаем
+  }
+
   var container = document.getElementById('ex3Container');
   var html = '';
   ex3Data.forEach(function(opt, i) {
@@ -2918,7 +2930,9 @@ function renderEx3() {
 function selectEx3(idx) {
   if (state.ex3.done) return;
   state.ex3.selected = idx;
-  document.querySelectorAll('.option-card').forEach(function(c, i) {
+  
+  // Ищем карточки строго внутри контейнера ex3Container
+  document.querySelectorAll('#ex3Container .option-card').forEach(function(c, i) {
     c.classList.toggle('selected', i === idx);
   });
   document.getElementById('ex3Submit').classList.remove('hidden');
@@ -2932,7 +2946,7 @@ function submitEx3() {
   document.getElementById('ex3Score').textContent = state.ex3.score + ' / 4 баллов';
   document.getElementById('ex3Submit').classList.add('hidden');
 
-  document.querySelectorAll('.option-card').forEach(function(c, i) {
+  document.querySelectorAll('#ex3Container .option-card').forEach(function(c, i) {
     c.classList.add('locked');
     c.classList.remove('selected');
     c.classList.add(ex3Data[i].cls);
