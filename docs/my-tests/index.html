@@ -4472,7 +4472,25 @@ function goToSlide(idx) {
   updateNav();
 }
 
-function goNext() { if (canGoNext()) goToSlide(state.current + 1); }
+function goNext() { 
+  if (canGoNext()) {
+    // 1. Сначала переключаем слайд
+    goToSlide(state.current + 1); 
+
+    // 2. Сразу после переключения отправляем данные в аналитику
+    var nextSlideNumber = state.current; // Это номер нового слайда, на который перешел юзер
+
+    // Отправка в Google Analytics 4
+    if (typeof gtag !== 'undefined') {
+      gtag('event', 'view_question', { 'question_number': nextSlideNumber });
+    }
+
+    // Отправка в Яндекс Метрику (замените 12345678 на ваш номер счетчика)
+    if (typeof ym !== 'undefined') {
+      ym(12345678, 'reachGoal', 'question_' + nextSlideNumber);
+    }
+  } 
+}
 function goPrev() { goToSlide(state.current - 1); }
 
 /* ═══ KEYBOARD NAV ═══ */
