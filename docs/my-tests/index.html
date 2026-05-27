@@ -4257,6 +4257,12 @@ function showFinalResults() {
   var m5 = state.m5ex1.score + state.m5ex2.score + state.m5ex3.score;
   var total = m1 + m2 + m3 + m4 + m5;
   var pct = Math.round((total / 87) * 100);
+
+  // 1. ОТПРАВКА КЛЮЧЕВОЙ КОНВЕРСИИ В GOOGLE ANALYTICS 4
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'test_completed');
+  }
+
   document.getElementById('finalScoreBig').textContent = total;
   document.getElementById('finalResM1').textContent = m1 + '/20';
   document.getElementById('finalResM2').textContent = m2 + '/19';
@@ -4285,7 +4291,7 @@ function showFinalResults() {
   }
 
   // ==========================================
-  // ОТПРАВКА ДАННЫХ В GOOGLE ТАБЛИЦУ
+  // 2. ОТПРАВКА ДАННЫХ В GOOGLE ТАБЛИЦУ
   // ==========================================
   try {
     var answersString = "М1: " + m1 + ", М2: " + m2 + ", М3: " + m3 + ", М4: " + m4 + ", М5: " + m5;
